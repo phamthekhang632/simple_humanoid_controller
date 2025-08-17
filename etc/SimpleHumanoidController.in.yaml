@@ -1,0 +1,5 @@
+---
+MainRobot: JVRC1
+Enabled: [SimpleHumanoidController]
+Timestep: 0.005
+
