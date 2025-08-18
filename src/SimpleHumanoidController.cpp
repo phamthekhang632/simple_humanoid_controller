@@ -33,6 +33,19 @@ SimpleHumanoidController::SimpleHumanoidController(mc_rbdyn::RobotModulePtr rm, 
   leftHandInitPose_ = robot().bodyPosW("l_wrist");
   rightHandInitPose_ = robot().bodyPosW("r_wrist");
 
+  // Look at left hand
+  // lookAtTask_ = std::make_shared<mc_tasks::LookAtTask>(
+  //     robot().frame("NECK_R_S"),       // "gaze" frame (depends on your robot, could be "HEAD_LINK", "NECK_PITCH", or "Head")
+  //     leftForwardPose_.translation()); // target position to look at;
+
+  lookAtTask_ = std::make_shared<mc_tasks::LookAtTask>(
+      "NECK_R_S",
+      gazeVector,
+      robots(),
+      0);
+
+  solver().addTask(lookAtTask_);
+
   mc_rtc::log::success("SimpleHumanoidController init done");
 }
 
@@ -48,6 +61,8 @@ bool SimpleHumanoidController::run()
   {
     switchState();
   }
+
+  lookAtTask_->target(robot().bodyPosW("l_wrist").translation());
 
   return mc_control::MCController::run();
 }
