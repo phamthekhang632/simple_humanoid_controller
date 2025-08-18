@@ -3,7 +3,7 @@
 #include <mc_control/mc_controller.h>
 #include <mc_tasks/CoMTask.h>
 #include <mc_tasks/EndEffectorTask.h>
-#include <mc_tasks/LookAtFrameTask.h>
+#include <mc_tasks/LookAtTask.h>
 
 #include "api.h"
 
@@ -20,7 +20,8 @@ private:
   std::shared_ptr<mc_tasks::EndEffectorTask> leftHandTask_;
   std::shared_ptr<mc_tasks::EndEffectorTask> rightHandTask_;
   Eigen::Vector3d gazeVector{1, 0, 0};
-  std::shared_ptr<mc_tasks::LookAtFrameTask> lookAtTask_;
+  std::string lookingTarget{"l_wrist"};
+  std::shared_ptr<mc_tasks::LookAtTask> lookAtTask_;
 
   // Timing and state
   enum class HandState

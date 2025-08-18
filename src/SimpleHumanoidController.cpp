@@ -37,18 +37,31 @@ SimpleHumanoidController::SimpleHumanoidController(mc_rbdyn::RobotModulePtr rm, 
 
   // Looking at hand
 
-  const auto &frames = robot().mb().joints(); // Get all frames
-  std::cout << "Robot joints:" << std::endl;
-  for (const auto &frame : frames)
-  {
-    std::cout << "- " << frame << std::endl;
-  }
+  // const auto &frames = robot().mb().joints(); // Get all frames
+  // std::cout << "Robot joints:" << std::endl;
+  // for (const auto &frame : frames)
+  // {
+  //   std::cout << "- " << frame << std::endl;
+  // }
 
-  lookAtTask_ = std::make_shared<mc_tasks::LookAtFrameTask>(
-      robot().frame("NECK_R_S"), // gaze frame
+  // const auto &neckYLimit = robot().limits()["NECK_Y"];
+  // std::cout << "NECK_Y limits: ["
+  //           << neckYLimit.min << ", "
+  //           << neckYLimit.max << "]" << std::endl;
+
+  // lookAtTask_ = std::make_shared<mc_tasks::LookAtFrameTask>(
+  //     robot().frame("NECK_R_S"), // gaze frame
+  //     gazeVector,
+  //     robot().frame("l_wrist")); // target frame
+
+  lookAtTask_ = std::make_shared<mc_tasks::LookAtTask>(
+      "NECK_R_S",
       gazeVector,
-      robot().frame("l_wrist")); // target frame
-  lookAtTask_->selectActiveJoints({"NECK_Y", "NECK_R", "NECK_P"});
+      robot().bodyPosW(lookingTarget).translation(),
+      robots(),
+      0);
+  lookAtTask_->selectActiveJoints({"NECK_P", "NECK_Y", "NECK_R"});
+  lookAtTask_->stiffness(10.0);
   solver().addTask(lookAtTask_);
 
   mc_rtc::log::success("SimpleHumanoidController init done");
@@ -67,6 +80,15 @@ bool SimpleHumanoidController::run()
     switchState();
   }
 
+  if (currentState_ == HandState::BOTH_FORWARD || currentState_ == HandState::BOTH_BACK)
+  {
+    lookAtTask_->target(Eigen::Vector3d(1000, 0, 0)); // Look at the center
+  }
+  else
+  {
+    lookAtTask_->target(robot().bodyPosW(lookingTarget).translation());
+  }
+
   return mc_control::MCController::run();
 }
 
@@ -75,6 +97,8 @@ void SimpleHumanoidController::reset(const mc_control::ControllerResetData &rese
   leftHandTask_->reset();
   rightHandTask_->reset();
   currentState_ = HandState::LEFT_FORWARD;
+
+  lookAtTask_->reset();
 
   mc_control::MCController::reset(reset_data);
 }
@@ -85,6 +109,7 @@ void SimpleHumanoidController::switchState()
   {
   case HandState::LEFT_FORWARD:
     leftHandTask_->set_ef_pose(leftForwardPose_);
+    lookingTarget = "l_wrist";
     currentState_ = HandState::LEFT_BACK;
     break;
 
@@ -95,6 +120,7 @@ void SimpleHumanoidController::switchState()
 
   case HandState::RIGHT_FORWARD:
     rightHandTask_->set_ef_pose(rightForwardPose_);
+    lookingTarget = "r_wrist";
     currentState_ = HandState::RIGHT_BACK;
     break;
 
