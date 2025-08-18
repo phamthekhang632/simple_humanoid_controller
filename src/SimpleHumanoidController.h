@@ -17,13 +17,10 @@ struct SimpleHumanoidController_DLLAPI SimpleHumanoidController : public mc_cont
 private:
   mc_rtc::Configuration config_{};
 
+  // Moving hands task
   std::shared_ptr<mc_tasks::EndEffectorTask> leftHandTask_;
   std::shared_ptr<mc_tasks::EndEffectorTask> rightHandTask_;
-  Eigen::Vector3d gazeVector{1, 0, 0};
-  std::string lookingTarget{"l_wrist"};
-  std::shared_ptr<mc_tasks::LookAtTask> lookAtTask_;
 
-  // Timing and state
   enum class HandState
   {
     LEFT_FORWARD,
@@ -35,11 +32,16 @@ private:
   };
   HandState currentState_ = HandState::LEFT_FORWARD;
 
-  // Store target poses
   sva::PTransformd leftForwardPose_;
   sva::PTransformd rightForwardPose_;
   sva::PTransformd leftHandInitPose_;
   sva::PTransformd rightHandInitPose_;
 
   void switchState();
+
+  // Looking task
+  Eigen::Vector3d gazeVector{1, 0, 0};
+  std::string lookingTarget{"l_wrist"};
+  std::shared_ptr<mc_tasks::LookAtTask> lookAtTask_;
+  void updateLookingTask(float leftError = 0.0, float rightError = 0.0);
 };
