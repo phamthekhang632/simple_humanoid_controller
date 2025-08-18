@@ -4,8 +4,6 @@
 #include <mc_rtc/logging.h>
 #include <mc_tasks/MetaTaskLoader.h>
 
-#include <mc_rbdyn/RobotLoader.h>
-
 SimpleHumanoidController::SimpleHumanoidController(mc_rbdyn::RobotModulePtr rm, double dt, const mc_rtc::Configuration &config)
     : mc_control::MCController(rm, dt)
 {
@@ -13,11 +11,11 @@ SimpleHumanoidController::SimpleHumanoidController(mc_rbdyn::RobotModulePtr rm, 
   solver().addConstraintSet(contactConstraint);
   solver().addConstraintSet(dynamicsConstraint);
   solver().addTask(postureTask);
+  // postureTask->stiffness(10);
 
   // CoM
   addContact({robot().name(), "ground", "LeftFoot", "AllGround"});
   addContact({robot().name(), "ground", "RightFoot", "AllGround"});
-  postureTask->stiffness(5);
 
   // End effectors
   leftHandTask_ = mc_tasks::MetaTaskLoader::load<mc_tasks::EndEffectorTask>(
@@ -36,32 +34,17 @@ SimpleHumanoidController::SimpleHumanoidController(mc_rbdyn::RobotModulePtr rm, 
   rightHandInitPose_ = robot().bodyPosW("r_wrist");
 
   // Looking at hand
-
-  // const auto &frames = robot().mb().joints(); // Get all frames
-  // std::cout << "Robot joints:" << std::endl;
-  // for (const auto &frame : frames)
-  // {
-  //   std::cout << "- " << frame << std::endl;
-  // }
-
-  // const auto &neckYLimit = robot().limits()["NECK_Y"];
-  // std::cout << "NECK_Y limits: ["
-  //           << neckYLimit.min << ", "
-  //           << neckYLimit.max << "]" << std::endl;
-
-  // lookAtTask_ = std::make_shared<mc_tasks::LookAtFrameTask>(
-  //     robot().frame("NECK_R_S"), // gaze frame
-  //     gazeVector,
-  //     robot().frame("l_wrist")); // target frame
-
   lookAtTask_ = std::make_shared<mc_tasks::LookAtTask>(
-      "NECK_R_S",
+      "NECK_P_S",
       gazeVector,
       robot().bodyPosW(lookingTarget).translation(),
       robots(),
       0);
-  lookAtTask_->selectActiveJoints({"NECK_P", "NECK_Y", "NECK_R"});
-  lookAtTask_->stiffness(10.0);
+
+  lookAtTask_->selectActiveJoints(
+      solver(),
+      {"NECK_P", "NECK_R", "NECK_Y"});
+
   solver().addTask(lookAtTask_);
 
   mc_rtc::log::success("SimpleHumanoidController init done");
@@ -69,25 +52,15 @@ SimpleHumanoidController::SimpleHumanoidController(mc_rbdyn::RobotModulePtr rm, 
 
 bool SimpleHumanoidController::run()
 {
-  auto leftError = leftHandTask_->eval();
-  auto rightError = rightHandTask_->eval();
+  float leftError = leftHandTask_->eval().norm();
+  float rightError = rightHandTask_->eval().norm();
 
-  bool leftReached = leftError.norm() < 0.02;
-  bool rightReached = rightError.norm() < 0.02;
-
-  if (leftReached && rightReached)
+  if (leftError < 0.02 && rightError < 0.02)
   {
     switchState();
   }
 
-  if (currentState_ == HandState::BOTH_FORWARD || currentState_ == HandState::BOTH_BACK)
-  {
-    lookAtTask_->target(Eigen::Vector3d(1000, 0, 0)); // Look at the center
-  }
-  else
-  {
-    lookAtTask_->target(robot().bodyPosW(lookingTarget).translation());
-  }
+  updateLookingTask(leftError, rightError);
 
   return mc_control::MCController::run();
 }
@@ -140,6 +113,31 @@ void SimpleHumanoidController::switchState()
     rightHandTask_->set_ef_pose(rightHandInitPose_);
     currentState_ = HandState::LEFT_FORWARD;
     break;
+  }
+}
+
+void SimpleHumanoidController::updateLookingTask(float leftError, float rightError)
+{
+  // The currentState_ checking is a bit counter-intuitive
+  // Since the currentState_ is update as soon as the switchState() is called
+  // We need to check the with the state one step into the future
+  if (currentState_ == HandState::BOTH_BACK || currentState_ == HandState::LEFT_FORWARD)
+  {
+    lookAtTask_->target(Eigen::Vector3d(1000, 0, 0)); // Looking far ahead
+  }
+  else
+  {
+    // Stop looking at the hand when moving back to original position
+    // This is to anoid having the pictch angle too low
+    if ((currentState_ == HandState::RIGHT_FORWARD && leftError < 0.2) ||
+        (currentState_ == HandState::BOTH_FORWARD && rightError < 0.2))
+    {
+      lookAtTask_->target(Eigen::Vector3d(1000, 0, 0)); // Looking far ahead
+    }
+    else
+    {
+      lookAtTask_->target(robot().bodyPosW(lookingTarget).translation());
+    }
   }
 }
 
