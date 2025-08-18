@@ -4,8 +4,6 @@
 #include <mc_rtc/logging.h>
 #include <mc_tasks/MetaTaskLoader.h>
 
-#include <chrono>
-
 SimpleHumanoidController::SimpleHumanoidController(mc_rbdyn::RobotModulePtr rm, double dt, const mc_rtc::Configuration &config)
     : mc_control::MCController(rm, dt)
 {
@@ -40,13 +38,15 @@ SimpleHumanoidController::SimpleHumanoidController(mc_rbdyn::RobotModulePtr rm, 
 
 bool SimpleHumanoidController::run()
 {
-  auto now = std::chrono::steady_clock::now();
-  double elapsed = std::chrono::duration<double>(now - stateStartTime_).count();
+  auto leftError = leftHandTask_->eval();
+  auto rightError = rightHandTask_->eval();
 
-  if (elapsed > stateDuration_)
+  bool leftReached = (leftPos - leftTargetForCurrentState()).norm() < 0.02;
+  bool rightReached = (rightPos - rightTargetForCurrentState()).norm() < 0.02;
+
+  if (leftReached && rightReached)
   {
     switchState();
-    stateStartTime_ = now;
   }
 
   return mc_control::MCController::run();
