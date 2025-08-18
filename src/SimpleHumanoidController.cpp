@@ -4,6 +4,8 @@
 #include <mc_rtc/logging.h>
 #include <mc_tasks/MetaTaskLoader.h>
 
+#include <mc_rbdyn/RobotLoader.h>
+
 SimpleHumanoidController::SimpleHumanoidController(mc_rbdyn::RobotModulePtr rm, double dt, const mc_rtc::Configuration &config)
     : mc_control::MCController(rm, dt)
 {
@@ -15,7 +17,7 @@ SimpleHumanoidController::SimpleHumanoidController(mc_rbdyn::RobotModulePtr rm, 
   // CoM
   addContact({robot().name(), "ground", "LeftFoot", "AllGround"});
   addContact({robot().name(), "ground", "RightFoot", "AllGround"});
-  postureTask->stiffness(1);
+  postureTask->stiffness(5);
 
   // End effectors
   leftHandTask_ = mc_tasks::MetaTaskLoader::load<mc_tasks::EndEffectorTask>(
@@ -33,17 +35,20 @@ SimpleHumanoidController::SimpleHumanoidController(mc_rbdyn::RobotModulePtr rm, 
   leftHandInitPose_ = robot().bodyPosW("l_wrist");
   rightHandInitPose_ = robot().bodyPosW("r_wrist");
 
-  // Look at left hand
-  // lookAtTask_ = std::make_shared<mc_tasks::LookAtTask>(
-  //     robot().frame("NECK_R_S"),       // "gaze" frame (depends on your robot, could be "HEAD_LINK", "NECK_PITCH", or "Head")
-  //     leftForwardPose_.translation()); // target position to look at;
+  // Looking at hand
 
-  lookAtTask_ = std::make_shared<mc_tasks::LookAtTask>(
-      "NECK_R_S",
+  const auto &frames = robot().mb().joints(); // Get all frames
+  std::cout << "Robot joints:" << std::endl;
+  for (const auto &frame : frames)
+  {
+    std::cout << "- " << frame << std::endl;
+  }
+
+  lookAtTask_ = std::make_shared<mc_tasks::LookAtFrameTask>(
+      robot().frame("NECK_R_S"), // gaze frame
       gazeVector,
-      robots(),
-      0);
-
+      robot().frame("l_wrist")); // target frame
+  lookAtTask_->selectActiveJoints({"NECK_Y", "NECK_R", "NECK_P"});
   solver().addTask(lookAtTask_);
 
   mc_rtc::log::success("SimpleHumanoidController init done");
@@ -61,8 +66,6 @@ bool SimpleHumanoidController::run()
   {
     switchState();
   }
-
-  lookAtTask_->target(robot().bodyPosW("l_wrist").translation());
 
   return mc_control::MCController::run();
 }
