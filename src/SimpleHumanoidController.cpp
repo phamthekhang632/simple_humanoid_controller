@@ -28,10 +28,8 @@ SimpleHumanoidController::SimpleHumanoidController(mc_rbdyn::RobotModulePtr rm, 
   solver().addTask(rightHandTask_);
 
   // Save initial poses
-  leftHandInitPose_ = leftHandTask_->get_ef_pose();
-  rightHandInitPose_ = rightHandTask_->get_ef_pose();
-
-  stateStartTime_ = std::chrono::steady_clock::now();
+  leftHandInitPose_ = robot().bodyPosW("l_wrist");
+  rightHandInitPose_ = robot().bodyPosW("r_wrist");
 
   mc_rtc::log::success("SimpleHumanoidController init done");
 }
@@ -41,8 +39,8 @@ bool SimpleHumanoidController::run()
   auto leftError = leftHandTask_->eval();
   auto rightError = rightHandTask_->eval();
 
-  bool leftReached = (leftPos - leftTargetForCurrentState()).norm() < 0.02;
-  bool rightReached = (rightPos - rightTargetForCurrentState()).norm() < 0.02;
+  bool leftReached = leftError.norm() < 0.02;
+  bool rightReached = rightError.norm() < 0.02;
 
   if (leftReached && rightReached)
   {
@@ -57,7 +55,6 @@ void SimpleHumanoidController::reset(const mc_control::ControllerResetData &rese
   leftHandTask_->reset();
   rightHandTask_->reset();
   currentState_ = HandState::LEFT_FORWARD;
-  stateStartTime_ = std::chrono::steady_clock::now();
 
   mc_control::MCController::reset(reset_data);
 }
