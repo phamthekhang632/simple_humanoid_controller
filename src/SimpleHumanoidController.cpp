@@ -33,6 +33,12 @@ SimpleHumanoidController::SimpleHumanoidController(mc_rbdyn::RobotModulePtr rm, 
       "extensions/simple_humanoid_controller/etc/right_task.yaml");
   solver().addTask(rightHandTask_);
 
+  // Save initial poses
+  leftHandInitPose_ = leftHandTask_->get_ef_pose();
+  rightHandInitPose_ = rightHandTask_->get_ef_pose();
+
+  stateStartTime_ = std::chrono::steady_clock::now();
+
   mc_rtc::log::success("SimpleHumanoidController init done");
 }
 
