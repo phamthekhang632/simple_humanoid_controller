@@ -27,7 +27,9 @@ SimpleHumanoidController::SimpleHumanoidController(mc_rbdyn::RobotModulePtr rm, 
       "extensions/simple_humanoid_controller/etc/right_task.yaml");
   solver().addTask(rightHandTask_);
 
-  // Save initial poses
+  // Save target forward and backward poses
+  leftForwardPose_ = leftHandTask_->get_ef_pose();
+  rightForwardPose_ = rightHandTask_->get_ef_pose();
   leftHandInitPose_ = robot().bodyPosW("l_wrist");
   rightHandInitPose_ = robot().bodyPosW("r_wrist");
 
@@ -61,16 +63,10 @@ void SimpleHumanoidController::reset(const mc_control::ControllerResetData &rese
 
 void SimpleHumanoidController::switchState()
 {
-  // Define target positions
-  Eigen::Vector3d leftTarget{0.5, 0.25, 1.1};
-  Eigen::Vector3d rightTarget{0.5, -0.25, 1.1};
-  Eigen::Quaterniond quat(0.7, 0, 0.7, 0); // w,x,y,z
-  quat.normalize();
-
   switch (currentState_)
   {
   case HandState::LEFT_FORWARD:
-    leftHandTask_->set_ef_pose({quat, leftTarget});
+    leftHandTask_->set_ef_pose(leftForwardPose_);
     currentState_ = HandState::LEFT_BACK;
     break;
 
@@ -80,7 +76,7 @@ void SimpleHumanoidController::switchState()
     break;
 
   case HandState::RIGHT_FORWARD:
-    rightHandTask_->set_ef_pose({quat, rightTarget});
+    rightHandTask_->set_ef_pose(rightForwardPose_);
     currentState_ = HandState::RIGHT_BACK;
     break;
 
@@ -90,8 +86,8 @@ void SimpleHumanoidController::switchState()
     break;
 
   case HandState::BOTH_FORWARD:
-    leftHandTask_->set_ef_pose({quat, leftTarget});
-    rightHandTask_->set_ef_pose({quat, rightTarget});
+    leftHandTask_->set_ef_pose(leftForwardPose_);
+    rightHandTask_->set_ef_pose(rightForwardPose_);
     currentState_ = HandState::BOTH_BACK;
     break;
 
