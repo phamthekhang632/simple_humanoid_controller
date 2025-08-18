@@ -8,23 +8,28 @@ SimpleHumanoidController::SimpleHumanoidController(mc_rbdyn::RobotModulePtr rm, 
     : mc_control::MCController(rm, dt)
 {
   config_.load(config);
-  solver().addConstraintSet(contactConstraint);
-  solver().addConstraintSet(dynamicsConstraint);
-  solver().addTask(postureTask);
-  // postureTask->stiffness(10);
 
-  // CoM
+  solver().addConstraintSet(contactConstraint);
+  solver().addConstraintSet(selfCollisionConstraint);
+  solver().addConstraintSet(dynamicsConstraint);
+  solver().addConstraintSet(compoundJointConstraint);
+  solver().addTask(postureTask);
+  postureTask->stiffness(10);
+
+  // Enforce left and right foot contacts
   addContact({robot().name(), "ground", "LeftFoot", "AllGround"});
   addContact({robot().name(), "ground", "RightFoot", "AllGround"});
 
   // End effectors
+  // leftHandTask_ = mc_tasks::MetaTaskLoader::load<mc_tasks::EndEffectorTask>(
+  //     solver(),
+  //     "extensions/simple_humanoid_controller/etc/left_task.yaml");
+
   leftHandTask_ = mc_tasks::MetaTaskLoader::load<mc_tasks::EndEffectorTask>(
-      solver(),
-      "extensions/simple_humanoid_controller/etc/left_task.yaml");
+      solver(), config("LeftHandTask"));
   solver().addTask(leftHandTask_);
   rightHandTask_ = mc_tasks::MetaTaskLoader::load<mc_tasks::EndEffectorTask>(
-      solver(),
-      "extensions/simple_humanoid_controller/etc/right_task.yaml");
+      solver(), config("RightHandTask"));
   solver().addTask(rightHandTask_);
 
   // Save target forward and backward poses

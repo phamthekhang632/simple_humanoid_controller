@@ -3,3 +3,15 @@ MainRobot: JVRC1
 Enabled: [SimpleHumanoidController]
 Timestep: 0.005
 
+LeftHandTask:
+  type: body6d
+  body: l_wrist
+  orientation: [0.7, 0, 0.7, 0]
+  position: [0.5, 0.25, 1.1]
+
+RightHandTask:
+  type: body6d
+  body: r_wrist
+  orientation: [0.7, 0, 0.7, 0]
+  position: [0.5, -0.25, 1.1]
+

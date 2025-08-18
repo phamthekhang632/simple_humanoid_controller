@@ -1,5 +1,0 @@
-type: lookat
-gaze_frame: "Head"
-target_frame: "l_wrist"
-stiffness: 5
-weight: 1000
