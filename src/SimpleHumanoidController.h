@@ -30,10 +30,10 @@ private:
     BOTH_BACK
   };
   HandState currentState_ = HandState::LEFT_FORWARD;
-  std::chrono::steady_clock::time_point stateStartTime_;
-  double stateDuration_ = 2.0; // seconds per step
 
-  // Store initial positions
+  // Store target poses
+  sva::PTransformd leftForwardPose_;
+  sva::PTransformd rightForwardPose_;
   sva::PTransformd leftHandInitPose_;
   sva::PTransformd rightHandInitPose_;
 
