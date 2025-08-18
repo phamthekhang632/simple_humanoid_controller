@@ -19,10 +19,6 @@ SimpleHumanoidController::SimpleHumanoidController(mc_rbdyn::RobotModulePtr rm, 
   addContact({robot().name(), "ground", "RightFoot", "AllGround"});
   postureTask->stiffness(1);
 
-  // End Effector
-  leftHandTask_ = mc_tasks::MetaTaskLoader::load<mc_tasks::EndEffectorTask>(solver(), "extensions/simple_humanoid_controller/task.yaml");
-  solver().addTask(leftHandTask_);
-
   // End effectors
   leftHandTask_ = mc_tasks::MetaTaskLoader::load<mc_tasks::EndEffectorTask>(
       solver(),
@@ -58,6 +54,11 @@ bool SimpleHumanoidController::run()
 
 void SimpleHumanoidController::reset(const mc_control::ControllerResetData &reset_data)
 {
+  leftHandTask_->reset();
+  rightHandTask_->reset();
+  currentState_ = HandState::LEFT_FORWARD;
+  stateStartTime_ = std::chrono::steady_clock::now();
+
   mc_control::MCController::reset(reset_data);
 }
 
