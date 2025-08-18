@@ -4,7 +4,8 @@
 #include <mc_rtc/logging.h>
 #include <mc_tasks/MetaTaskLoader.h>
 
-SimpleHumanoidController::SimpleHumanoidController(mc_rbdyn::RobotModulePtr rm, double dt, const mc_rtc::Configuration &config)
+SimpleHumanoidController::SimpleHumanoidController(
+    mc_rbdyn::RobotModulePtr rm, double dt, const mc_rtc::Configuration &config)
     : mc_control::MCController(rm, dt)
 {
   config_.load(config);
@@ -20,11 +21,7 @@ SimpleHumanoidController::SimpleHumanoidController(mc_rbdyn::RobotModulePtr rm, 
   addContact({robot().name(), "ground", "LeftFoot", "AllGround"});
   addContact({robot().name(), "ground", "RightFoot", "AllGround"});
 
-  // End effectors
-  // leftHandTask_ = mc_tasks::MetaTaskLoader::load<mc_tasks::EndEffectorTask>(
-  //     solver(),
-  //     "extensions/simple_humanoid_controller/etc/left_task.yaml");
-
+  // End effectors tasks to move hands
   leftHandTask_ = mc_tasks::MetaTaskLoader::load<mc_tasks::EndEffectorTask>(
       solver(), config("LeftHandTask"));
   solver().addTask(leftHandTask_);
@@ -45,11 +42,7 @@ SimpleHumanoidController::SimpleHumanoidController(mc_rbdyn::RobotModulePtr rm, 
       robot().bodyPosW(lookingTarget).translation(),
       robots(),
       0);
-
-  lookAtTask_->selectActiveJoints(
-      solver(),
-      {"NECK_P", "NECK_R", "NECK_Y"});
-
+  lookAtTask_->selectActiveJoints(solver(), {"NECK_P", "NECK_R", "NECK_Y"});
   solver().addTask(lookAtTask_);
 
   mc_rtc::log::success("SimpleHumanoidController init done");
@@ -59,7 +52,6 @@ bool SimpleHumanoidController::run()
 {
   float leftError = leftHandTask_->eval().norm();
   float rightError = rightHandTask_->eval().norm();
-
   if (leftError < 0.02 && rightError < 0.02)
   {
     switchState();
@@ -83,6 +75,10 @@ void SimpleHumanoidController::reset(const mc_control::ControllerResetData &rese
 
 void SimpleHumanoidController::switchState()
 {
+  /*
+  Switches the state of the robot to follow task in desired sequence.
+  */
+
   switch (currentState_)
   {
   case HandState::LEFT_FORWARD:
@@ -123,8 +119,14 @@ void SimpleHumanoidController::switchState()
 
 void SimpleHumanoidController::updateLookingTask(float leftError, float rightError)
 {
+  /*
+  The looking task is updated based on the current state of the hands.
+  When one hand is moving, we look at the moving hand.
+  When both hands are moving back, we look straight ahead.
+  */
+
   // The currentState_ checking is a bit counter-intuitive
-  // Since the currentState_ is update as soon as the switchState() is called
+  // Since the currentState_ is update as soon as switchState() is called
   // We need to check the with the state one step into the future
   if (currentState_ == HandState::BOTH_BACK || currentState_ == HandState::LEFT_FORWARD)
   {
@@ -137,7 +139,7 @@ void SimpleHumanoidController::updateLookingTask(float leftError, float rightErr
     if ((currentState_ == HandState::RIGHT_FORWARD && leftError < 0.2) ||
         (currentState_ == HandState::BOTH_FORWARD && rightError < 0.2))
     {
-      lookAtTask_->target(Eigen::Vector3d(1000, 0, 0)); // Looking far ahead
+      lookAtTask_->target(Eigen::Vector3d(1000, 0, 0));
     }
     else
     {
