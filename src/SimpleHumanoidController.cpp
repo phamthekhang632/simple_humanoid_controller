@@ -44,10 +44,15 @@ SimpleHumanoidController::SimpleHumanoidController(mc_rbdyn::RobotModulePtr rm, 
 
 bool SimpleHumanoidController::run()
 {
-  // // Get the current objective
-  // auto pt = leftHandTask_->get_ef_pose();
-  // // Update the rotation and position objective
-  // leftHandTask_->set_ef_pose(sva::PTransformd{sva::RotY(-M_PI / 2), Eigen::Vector3d{0.5, 0.25, 1.1}});
+  auto now = std::chrono::steady_clock::now();
+  double elapsed = std::chrono::duration<double>(now - stateStartTime_).count();
+
+  if (elapsed > stateDuration_)
+  {
+    switchState();
+    stateStartTime_ = now;
+  }
+
   return mc_control::MCController::run();
 }
 
