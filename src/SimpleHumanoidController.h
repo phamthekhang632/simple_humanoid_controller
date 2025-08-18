@@ -1,18 +1,41 @@
 #pragma once
 
 #include <mc_control/mc_controller.h>
+#include <mc_tasks/CoMTask.h>
+#include <mc_tasks/EndEffectorTask.h>
+
 #include "api.h"
 
 struct SimpleHumanoidController_DLLAPI SimpleHumanoidController : public mc_control::MCController
 {
-  SimpleHumanoidController(mc_rbdyn::RobotModulePtr rm, double dt, const mc_rtc::Configuration & config);
+  SimpleHumanoidController(mc_rbdyn::RobotModulePtr rm, double dt, const mc_rtc::Configuration &config);
 
   bool run() override;
-  void reset(const mc_control::ControllerResetData & reset_data) override;
-  void switch_target();
+  void reset(const mc_control::ControllerResetData &reset_data) override;
 
 private:
-    mc_rtc::Configuration config_;
-    int jointIndex = 0;
-    bool goingLeft = true;
+  mc_rtc::Configuration config_{};
+
+  std::shared_ptr<mc_tasks::EndEffectorTask> leftHandTask_;
+  std::shared_ptr<mc_tasks::EndEffectorTask> rightHandTask_;
+
+  // Timing and state
+  enum class HandState
+  {
+    LEFT_FORWARD,
+    LEFT_BACK,
+    RIGHT_FORWARD,
+    RIGHT_BACK,
+    BOTH_FORWARD,
+    BOTH_BACK
+  };
+  HandState currentState_ = HandState::LEFT_FORWARD;
+  std::chrono::steady_clock::time_point stateStartTime_;
+  double stateDuration_ = 2.0; // seconds per step
+
+  // Store initial positions
+  sva::PTransformd leftHandInitPose_;
+  sva::PTransformd rightHandInitPose_;
+
+  void switchState();
 };

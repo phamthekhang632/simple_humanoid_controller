@@ -1,47 +1,47 @@
 #include "SimpleHumanoidController.h"
 
-SimpleHumanoidController::SimpleHumanoidController(mc_rbdyn::RobotModulePtr rm, double dt, const mc_rtc::Configuration & config)
-: mc_control::MCController(rm, dt)
+#include <mc_rbdyn/RobotFrame.h>
+#include <mc_rtc/logging.h>
+#include <mc_tasks/MetaTaskLoader.h>
+
+#include <chrono>
+
+SimpleHumanoidController::SimpleHumanoidController(mc_rbdyn::RobotModulePtr rm, double dt, const mc_rtc::Configuration &config)
+    : mc_control::MCController(rm, dt)
 {
+  config_.load(config);
   solver().addConstraintSet(contactConstraint);
-  solver().addConstraintSet(kinematicsConstraint);
+  solver().addConstraintSet(dynamicsConstraint);
   solver().addTask(postureTask);
-  solver().setContacts({{}});
 
-  jointIndex = robot().jointIndexByName("NECK_Y");
+  // CoM
+  addContact({robot().name(), "ground", "LeftFoot", "AllGround"});
+  addContact({robot().name(), "ground", "RightFoot", "AllGround"});
+  postureTask->stiffness(1);
 
-  mc_rtc::log::success("SimpleHumanoidController init done ");
+  // End Effector
+  leftHandTask_ = mc_tasks::MetaTaskLoader::load<mc_tasks::EndEffectorTask>(solver(), "extensions/simple_humanoid_controller/task.yaml");
+  solver().addTask(leftHandTask_);
+
+  // leftHandTask_ = std::make_shared<mc_tasks::EndEffectorTask>("l_wrist", robots(), 0, 5.0, 500.0);
+  // solver().addTask(leftHandTask_);
+
+  mc_rtc::log::success("SimpleHumanoidController init done");
 }
 
 bool SimpleHumanoidController::run()
 {
-  if(std::abs(postureTask->posture()[jointIndex][0] - robot().mbc().q[jointIndex][0]) < 0.05)
-  {
-    switch_target();
-  }
+  // // Get the current objective
+  // auto pt = leftHandTask_->get_ef_pose();
+  // // Update the rotation and position objective
+  // leftHandTask_->set_ef_pose(sva::PTransformd{sva::RotY(-M_PI / 2), Eigen::Vector3d{0.5, 0.25, 1.1}});
   return mc_control::MCController::run();
 }
 
-void SimpleHumanoidController::reset(const mc_control::ControllerResetData & reset_data)
+void SimpleHumanoidController::reset(const mc_control::ControllerResetData &reset_data)
 {
+  // leftHandTask_->reset();
   mc_control::MCController::reset(reset_data);
-}
-
-void SimpleHumanoidController::switch_target()
-{
-  std::map<std::string, std::vector<double>> targetPosture;
-
-  if(goingLeft)
-  {
-      targetPosture["NECK_Y"] = {0.5};  // radians, looking left
-  }
-  else
-  {
-      targetPosture["NECK_Y"] = {-0.5};
-  }
-  postureTask->target(targetPosture);
-
-  goingLeft = !goingLeft;
 }
 
 CONTROLLER_CONSTRUCTOR("SimpleHumanoidController", SimpleHumanoidController)
