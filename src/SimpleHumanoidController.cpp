@@ -23,8 +23,15 @@ SimpleHumanoidController::SimpleHumanoidController(mc_rbdyn::RobotModulePtr rm, 
   leftHandTask_ = mc_tasks::MetaTaskLoader::load<mc_tasks::EndEffectorTask>(solver(), "extensions/simple_humanoid_controller/task.yaml");
   solver().addTask(leftHandTask_);
 
-  // leftHandTask_ = std::make_shared<mc_tasks::EndEffectorTask>("l_wrist", robots(), 0, 5.0, 500.0);
-  // solver().addTask(leftHandTask_);
+  // End effectors
+  leftHandTask_ = mc_tasks::MetaTaskLoader::load<mc_tasks::EndEffectorTask>(
+      solver(),
+      "extensions/simple_humanoid_controller/etc/left_task.yaml");
+  solver().addTask(leftHandTask_);
+  rightHandTask_ = mc_tasks::MetaTaskLoader::load<mc_tasks::EndEffectorTask>(
+      solver(),
+      "extensions/simple_humanoid_controller/etc/right_task.yaml");
+  solver().addTask(rightHandTask_);
 
   mc_rtc::log::success("SimpleHumanoidController init done");
 }
