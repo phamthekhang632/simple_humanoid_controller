@@ -58,8 +58,51 @@ bool SimpleHumanoidController::run()
 
 void SimpleHumanoidController::reset(const mc_control::ControllerResetData &reset_data)
 {
-  // leftHandTask_->reset();
   mc_control::MCController::reset(reset_data);
+}
+
+void SimpleHumanoidController::switchState()
+{
+  // Define target positions
+  Eigen::Vector3d leftTarget{0.5, 0.25, 1.1};
+  Eigen::Vector3d rightTarget{0.5, -0.25, 1.1};
+  Eigen::Quaterniond quat(0.7, 0, 0.7, 0); // w,x,y,z
+  quat.normalize();
+
+  switch (currentState_)
+  {
+  case HandState::LEFT_FORWARD:
+    leftHandTask_->set_ef_pose({quat, leftTarget});
+    currentState_ = HandState::LEFT_BACK;
+    break;
+
+  case HandState::LEFT_BACK:
+    leftHandTask_->set_ef_pose(leftHandInitPose_);
+    currentState_ = HandState::RIGHT_FORWARD;
+    break;
+
+  case HandState::RIGHT_FORWARD:
+    rightHandTask_->set_ef_pose({quat, rightTarget});
+    currentState_ = HandState::RIGHT_BACK;
+    break;
+
+  case HandState::RIGHT_BACK:
+    rightHandTask_->set_ef_pose(rightHandInitPose_);
+    currentState_ = HandState::BOTH_FORWARD;
+    break;
+
+  case HandState::BOTH_FORWARD:
+    leftHandTask_->set_ef_pose({quat, leftTarget});
+    rightHandTask_->set_ef_pose({quat, rightTarget});
+    currentState_ = HandState::BOTH_BACK;
+    break;
+
+  case HandState::BOTH_BACK:
+    leftHandTask_->set_ef_pose(leftHandInitPose_);
+    rightHandTask_->set_ef_pose(rightHandInitPose_);
+    currentState_ = HandState::LEFT_FORWARD;
+    break;
+  }
 }
 
 CONTROLLER_CONSTRUCTOR("SimpleHumanoidController", SimpleHumanoidController)
