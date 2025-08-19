@@ -11,9 +11,11 @@ The controller achieves the following:
 4. The right-hand moves back to its initial position
 5. Both hands move to their respective specified position
 6. Both hands go back to their initial position
-7. Repeat
+7. Repeat step 1 to 6
 
 While a single hand is moving, the robot looks at the moving hand. When both hands are moving, the robot looks forward.
+
+### Demo video
 
 [![Demo](media/demo.png)](media/demo.mp4)
 
@@ -23,7 +25,7 @@ Requirements
   - [mc_rtc_superbuild](https://github.com/mc-rtc/mc-rtc-superbuild.git) is provided with mc_rtc. "It will clone, update, build, install all of mc_rtc dependencies, mc_rtc itself and downstream projects."
 - RViZ: This is technically preinstalled by mc_rtc_superbuild. However, if you are cloning from the link above, you will need to turn on ROS support
     ```json
-    // Inside .\CMakePresets.json
+    // .\CMakePresets.json - inside your preset of choice
     "WITH_ROS_SUPPORT": "ON"
     ```
 - X11
@@ -37,14 +39,14 @@ RViZ and X11 are not required if you are using other methods for visualization.
 
 ### Windows
 
-If you are on Windows, you can use `jammy` container from this [repository](https://github.com/phamthekhang632/mc-rtc-superbuild). There are some adjustments to make the installation smoother. You still need to install VcXsrv.
+If you are on Windows, you can use `jammy` container from this [repository](https://github.com/phamthekhang632/mc-rtc-superbuild). There are some adjustments to make the installation smoother. You still need to install Docker and VcXsrv. Check the branch `installation` for more details.
 
 Usage
 --
 
-*The following instructions assume you are using `mc_rtc_superbuild` in a devcontainer.*
+*The following instructions assume you are using `mc_rtc_superbuild` in a [devcontainer](https://github.com/mc-rtc/mc-rtc-superbuild/blob/main/doc/devcontainer.md).*
 
-Configure `git`
+If this is your first time opening the container, configure `git`
 
 ```bash
 git config --global user.name "Full Name"
@@ -57,7 +59,7 @@ cd extensions
 git clone https://github.com/phamthekhang632/simple_humanoid_controller.git
 ```
 
-Building `mc_rtc` environment
+Building `mc_rtc` environment. The preset name might be different depending on which preset do you have ROS support turned on.
 
 ```bash
 cd ..
@@ -70,14 +72,7 @@ Build the projects
 cmake --build --preset relwithdebinfo -j
 ```
 
-Open RViZ
-
-```bash
-source /home/vscode/workspace/install/setup_mc_rtc.sh
-ros2 launch mc_rtc_ticker display.launch
-```
-
-In another terminal, running controller
+Running controller
 
 ```bash
 source /home/vscode/workspace/install/setup_mc_rtc.sh
@@ -90,7 +85,8 @@ For more instructions on how to install `mc_rtc`, please refer to the [official 
 For more options, you can run `mc_rtc_ticker --help`
 
 ```bash
-$ mc_rtc_ticker --help                                                                        
+mc_rtc_ticker --help                                                                        
+
 mc_rtc_ticker options:
   --help                           Show this help message
   -f [ --mc-config ] arg           Configuration given to mc_rtc
@@ -106,3 +102,32 @@ mc_rtc_ticker options:
   --replay-outputs                 Enable outputs replay (override controller)
 ```
 
+### Visualization
+
+In another terminal, open RViZ window
+
+```bash
+source /home/vscode/workspace/install/setup_mc_rtc.sh
+ros2 launch mc_rtc_ticker display.launch
+```
+
+If you have an error here:
+- Fails because ROS is missing → ensure `"WITH_ROS_SUPPORT": "ON"`
+- RViZ cannot connect to X11 → check `DISPLAY` variable and X server
+
+Summary
+--
+
+```bash
+# clone mc_rtc_superbuild
+git clone https://github.com/mc-rtc/mc-rtc-superbuild.git
+# clone simple_humanoid_controller
+cd extensions
+git clone https://github.com/phamthekhang632/simple_humanoid_controller.git
+cd ..
+# building
+cmake --preset relwithdebinfo
+cmake --build --preset relwithdebinfo -j
+# running
+source /home/vscode/workspace/install/setup_mc_rtc.sh
+mc_rtc_ticker -f extensions/simple_humanoid_controller/etc/SimpleHumanoidController.in.yaml
