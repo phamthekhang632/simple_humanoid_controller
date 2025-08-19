@@ -23,7 +23,7 @@ Requirements
   - [mc_rtc_superbuild](https://github.com/mc-rtc/mc-rtc-superbuild.git) is provided with mc_rtc. "It will clone, update, build, install all of mc_rtc dependencies, mc_rtc itself and downstream projects."
 - RViZ: This is technically preinstalled by mc_rtc_superbuild. However, if you are cloning from the link above, you will need to turn on ROS support
     ```json
-    // .\CMakePresets.json
+    // Inside .\CMakePresets.json
     "WITH_ROS_SUPPORT": "ON"
     ```
 - X11
