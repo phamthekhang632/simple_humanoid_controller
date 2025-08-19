@@ -135,7 +135,7 @@ void SimpleHumanoidController::updateLookingTask(float leftError, float rightErr
   else
   {
     // Stop looking at the hand when moving back to original position
-    // This is to anoid having the pictch angle too low
+    // This is to avoid having the pictch angle of the neck too low
     if ((currentState_ == HandState::RIGHT_FORWARD && leftError < 0.2) ||
         (currentState_ == HandState::BOTH_FORWARD && rightError < 0.2))
     {
