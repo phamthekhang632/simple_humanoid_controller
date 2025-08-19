@@ -17,7 +17,7 @@ While a single hand is moving, the robot looks at the moving hand. When both han
 
 ### Demo video
 
-[![Demo](media/demo.png)](media/demo.mp4)
+[![Demo](media/demo.gif)](media/demo.mp4)
 
 Requirements
 --
