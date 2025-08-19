@@ -11,7 +11,7 @@ The controller achieves the following:
 4. The right-hand moves back to its initial position
 5. Both hands move to their respective specified position
 6. Both hands go back to their initial position
-7. Repeat step 1 to 6
+7. Repeat steps 1 to 6
 
 While a single hand is moving, the robot looks at the moving hand. When both hands are moving, the robot looks forward.
 
@@ -59,7 +59,7 @@ cd extensions
 git clone https://github.com/phamthekhang632/simple_humanoid_controller.git
 ```
 
-Building `mc_rtc` environment. The preset name might be different depending on which preset do you have ROS support turned on.
+Building `mc_rtc` environment. The preset name might be different depending on which preset you have ROS support turned on.
 
 ```bash
 cd ..
@@ -131,3 +131,10 @@ cmake --build --preset relwithdebinfo -j
 # running
 source /home/vscode/workspace/install/setup_mc_rtc.sh
 mc_rtc_ticker -f extensions/simple_humanoid_controller/etc/SimpleHumanoidController.in.yaml
+```
+
+```bash
+# for visualization
+source /home/vscode/workspace/install/setup_mc_rtc.sh
+ros2 launch mc_rtc_ticker display.launch
+```
