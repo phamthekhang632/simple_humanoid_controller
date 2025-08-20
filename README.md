@@ -1,7 +1,7 @@
 Simple Humanoid Controller
 ==
 
-This is a simple controller example for the JCVR1 robot using [mc_rtc](https://github.com/jrl-umi3218/mc_rtc.git) framework. 
+This is a simple controller example for the JVRC-1 robot using [mc_rtc](https://github.com/jrl-umi3218/mc_rtc.git) framework. 
 
 The controller achieves the following:
 
