@@ -39,7 +39,7 @@ RViZ and X11 are not required if you are using other methods for visualization.
 
 ### Windows
 
-If you are on Windows, you can use `jammy` container from this [repository](https://github.com/phamthekhang632/mc-rtc-superbuild). There are some adjustments to make the installation smoother. You still need to install Docker and VcXsrv. Check the branch `installation` for more details.
+If you are on Windows, you can use `jammy` container from this [repository](https://github.com/phamthekhang632/mc-rtc-superbuild). There are some adjustments to make the installation smoother. You still need to install Docker and VcXsrv. Check the branch [installation](https://github.com/phamthekhang632/mc-rtc-superbuild/tree/installation) for more details.
 
 Usage
 --
@@ -53,7 +53,7 @@ git config --global user.name "Full Name"
 git config --global user.email "your.email@provider.com"
 ```
 
-After installing `mc_rtc_superbuild`, clone this repository in `extensions` 
+After installing `mc_rtc_superbuild`, clone this repository in `extensions`
 ```bash
 cd extensions
 git clone https://github.com/phamthekhang632/simple_humanoid_controller.git
@@ -113,7 +113,7 @@ ros2 launch mc_rtc_ticker display.launch
 
 If you have an error here:
 - Fails because ROS is missing → ensure `"WITH_ROS_SUPPORT": "ON"`
-- RViZ cannot connect to X11 → check `DISPLAY` variable and X server
+- RViZ cannot connect to X11 → check `DISPLAY` variable and X server in `devcontainer.json`
 
 Summary
 --
