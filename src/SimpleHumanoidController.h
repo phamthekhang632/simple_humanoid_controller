@@ -1,47 +1,14 @@
 #pragma once
 
 #include <mc_control/mc_controller.h>
-#include <mc_tasks/CoMTask.h>
-#include <mc_tasks/EndEffectorTask.h>
-#include <mc_tasks/LookAtTask.h>
+#include <mc_control/fsm/Controller.h>
 
 #include "api.h"
 
-struct SimpleHumanoidController_DLLAPI SimpleHumanoidController : public mc_control::MCController
+struct SimpleHumanoidController_DLLAPI SimpleHumanoidController : public mc_control::fsm::Controller
 {
   SimpleHumanoidController(mc_rbdyn::RobotModulePtr rm, double dt, const mc_rtc::Configuration &config);
 
   bool run() override;
   void reset(const mc_control::ControllerResetData &reset_data) override;
-
-private:
-  mc_rtc::Configuration config_{};
-
-  // Moving hands task
-  std::shared_ptr<mc_tasks::EndEffectorTask> leftHandTask_;
-  std::shared_ptr<mc_tasks::EndEffectorTask> rightHandTask_;
-
-  enum class HandState
-  {
-    LEFT_FORWARD,
-    LEFT_BACK,
-    RIGHT_FORWARD,
-    RIGHT_BACK,
-    BOTH_FORWARD,
-    BOTH_BACK
-  };
-  HandState currentState_ = HandState::LEFT_FORWARD;
-
-  sva::PTransformd leftForwardPose_;
-  sva::PTransformd rightForwardPose_;
-  sva::PTransformd leftHandInitPose_;
-  sva::PTransformd rightHandInitPose_;
-
-  void switchState();
-
-  // Looking task
-  Eigen::Vector3d gazeVector{1, 0, 0};
-  std::string lookingTarget{"l_wrist"};
-  std::shared_ptr<mc_tasks::LookAtTask> lookAtTask_;
-  void updateLookingTask(float leftError = 0.0, float rightError = 0.0);
 };

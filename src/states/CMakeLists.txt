@@ -1,0 +1,3 @@
+add_fsm_state_simple(SimpleHumanoidController_Initial)
+
+add_fsm_data_directory(data)
