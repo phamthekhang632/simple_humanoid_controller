@@ -24,7 +24,7 @@ bool SimpleHumanoidController_Initial::run(mc_control::fsm::Controller &ctl_)
 
   if (startMoving_)
   {
-    output("Start Moving");
+    output("StartMoving");
     return true;
   }
   return false;

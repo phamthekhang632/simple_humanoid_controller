@@ -1,7 +1,22 @@
+# MainRobot: JVRC1
+# Enabled: [SimpleHumanoidController]
+# Timestep: 0.005
+
+# LeftHandTask:
+#   type: body6d
+#   body: l_wrist
+#   orientation: [0.7, 0, 0.7, 0]
+#   position: [0.5, 0.25, 1.1]
+
+# RightHandTask:
+#   type: body6d
+#   body: r_wrist
+#   orientation: [0.7, 0, 0.7, 0]
+#   position: [0.5, -0.25, 1.1]
 ---
 MainRobot: JVRC1
-Enabled: [SimpleHumanoidController]
-Timestep: 0.005
+Enabled: SimpleHumanoidController
+
 # If true, the FSM transitions are managed by an external tool
 Managed: false
 # If true and the FSM is self-managed, transitions should be triggered
@@ -9,6 +24,7 @@ StepByStep: true
 # Change idle behaviour, if true the state is kept until transition,
 # otherwise the FSM holds the last state until transition
 IdleKeepState: false
+
 # Where to look for state libraries
 StatesLibraries:
 - "@MC_STATES_DEFAULT_RUNTIME_INSTALL_PREFIX@"
@@ -17,22 +33,32 @@ StatesLibraries:
 StatesFiles:
 - "@MC_STATES_DEFAULT_RUNTIME_INSTALL_PREFIX@/data"
 - "@MC_STATES_RUNTIME_INSTALL_PREFIX@/data"
+
 # If true, state factory will be more verbose
 VerboseStateFactory: false
+
 # Additional robots to load
 robots:
   ground:
     module: env/ground
+  # door:
+  #   module: env/door
+  #   init_pos:
+  #     translation: [0.70, 0.5, 0.0]
+  #     rotation: [0.0, 0.0, 1.57]
+
 # General constraints, always on
 constraints:
 - type: contact
 - type: dynamics
   damper: [0.1, 0.01, 0.5]
 - type: compoundJoint
-# Collision constraint
+
+# Self constraint
 collisions:
 - type: collision
   useMinimal: true
+
 # Initial set of contacts
 contacts:
 - r2: ground
@@ -50,10 +76,70 @@ jvrc1:
   ff:
     stiffness: 2
     weight: 100
+
 # Implement some additional text states
-states: {}
-# Transitions map
+states:
+  SimpleHumanoidController::Standing:
+    base: MetaTasks
+    tasks:
+      CoM:
+        type: com
+        above: [LeftFoot, RightFoot]
+        weight: 2000
+        stiffness: 5
+      KeepChest:
+        type: orientation
+        body: WAIST_R_S
+        weight: 100
+        stiffness: 1
+
+  SimpleHumanoidController::LeftForward:
+    base: MetaTasks
+    tasks:
+      LeftHandTask:
+        type: body6d
+        frame: l_wrist
+        orientation: [0.7, 0, 0.7, 0]
+        position: [0.5, 0.25, 1.1]
+        completion:
+            eval: 0.1
+
+  SimpleHumanoidController::RightForward:
+    base: MetaTasks
+    tasks:
+      LeftHandTask:
+        type: body6d
+        frame: r_wrist
+        orientation: [0.7, 0, 0.7, 0]
+        position: [0.5, -0.25, 1.1]
+        completion:
+          eval: 0.1
+
+  SimpleHumanoidController::FSM:
+    base: Meta
+    transitions:
+    - [SimpleHumanoidController_Initial, StartMoving, SimpleHumanoidController::LeftForward, Auto]
+    - [SimpleHumanoidController::LeftForward, OK, SimpleHumanoidController::RightForward, Auto]
+    - [SimpleHumanoidController::RightForward, OK, SimpleHumanoidController::LeftForward, Auto]
+    - [SimpleHumanoidController::LeftForward, OK, SimpleHumanoidController::RightForward, Auto]
+
+  SimpleHumanoidController::Demo:
+    base: Parallel
+    states: [SimpleHumanoidController::Standing, SimpleHumanoidController::FSM]
+
 transitions:
-- [SimpleHumanoidControllerFSM_Initial, OK, SimpleHumanoidControllerFSM_Initial, Strict]
+- [SimpleHumanoidController::Demo, OK, SimpleHumanoidController::Demo, Strict]
+
 # Initial state
-init: SimpleHumanoidControllerFSM_Initial
+init: SimpleHumanoidController::Demo
+
+ObserverPipelines:
+  name: MainRobotObservation
+  observers:
+    - type: Encoder
+      config:
+        position: control
+        velocity: control
+    - type: BodySensor
+      config:
+        method: control
