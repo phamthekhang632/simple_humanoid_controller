@@ -1,65 +1,33 @@
-# MainRobot: JVRC1
-# Enabled: [SimpleHumanoidController]
-# Timestep: 0.005
-
-# LeftHandTask:
-#   type: body6d
-#   body: l_wrist
-#   orientation: [0.7, 0, 0.7, 0]
-#   position: [0.5, 0.25, 1.1]
-
-# RightHandTask:
-#   type: body6d
-#   body: r_wrist
-#   orientation: [0.7, 0, 0.7, 0]
-#   position: [0.5, -0.25, 1.1]
 ---
 MainRobot: JVRC1
 Enabled: SimpleHumanoidController
 
-# If true, the FSM transitions are managed by an external tool
 Managed: false
-# If true and the FSM is self-managed, transitions should be triggered
-StepByStep: true
-# Change idle behaviour, if true the state is kept until transition,
-# otherwise the FSM holds the last state until transition
+StepByStep: false
 IdleKeepState: false
 
-# Where to look for state libraries
 StatesLibraries:
 - "@MC_STATES_DEFAULT_RUNTIME_INSTALL_PREFIX@"
 - "@MC_STATES_RUNTIME_INSTALL_PREFIX@"
-# Where to look for state files
 StatesFiles:
 - "@MC_STATES_DEFAULT_RUNTIME_INSTALL_PREFIX@/data"
 - "@MC_STATES_RUNTIME_INSTALL_PREFIX@/data"
 
-# If true, state factory will be more verbose
 VerboseStateFactory: false
 
-# Additional robots to load
 robots:
   ground:
     module: env/ground
-  # door:
-  #   module: env/door
-  #   init_pos:
-  #     translation: [0.70, 0.5, 0.0]
-  #     rotation: [0.0, 0.0, 1.57]
 
-# General constraints, always on
 constraints:
 - type: contact
 - type: dynamics
   damper: [0.1, 0.01, 0.5]
 - type: compoundJoint
 
-# Self constraint
 collisions:
 - type: collision
-  useMinimal: true
 
-# Initial set of contacts
 contacts:
 - r2: ground
   r1Surface: LeftFoot
@@ -68,16 +36,10 @@ contacts:
   r1Surface: RightFoot
   r2Surface: AllGround
 
-# Some options for a specific robot
 jvrc1:
   posture:
-    stiffness: 1
-    weight: 10
-  ff:
-    stiffness: 2
-    weight: 100
+    stiffness: 10
 
-# Implement some additional text states
 states:
   SimpleHumanoidController::Standing:
     base: MetaTasks
@@ -89,20 +51,22 @@ states:
         stiffness: 5
       KeepChest:
         type: orientation
-        body: WAIST_R_S
+        frame: WAIST_R_S
         weight: 100
         stiffness: 1
 
   SimpleHumanoidController::LeftForward:
     base: MetaTasks
     tasks:
-      LeftHandForward:
+      LeftHandTask:
         type: body6d
         frame: l_wrist
         position: [0.5, 0.25, 1.1]
         orientation: [0.7, 0, 0.7, 0]
         completion:
-            eval: 0.1
+          OR:
+            - eval: 0.1
+            - timeout: 5
       LookAtLeftHand:
         type: lookAtSurface
         frame: NECK_P_S
@@ -113,24 +77,27 @@ states:
   SimpleHumanoidController::LeftBackward:
     base: MetaTasks
     tasks:
-      LeftHandReturn:
+      LeftHandTask:
         type: body6d
         frame: l_wrist
-        position: [0.122195, 0.327027, 0.831981]
-        orientation: [0.944, 0, 0.328, 0]
+        position: [0.14, 0.33, 0.83]
+        orientation: [0.97, 0.081, 0.21, 0.025]
         completion:
-            eval: 0.1
-
+          OR:
+            - eval: 0.1
+            - timeout: 5
   SimpleHumanoidController::RightForward:
     base: MetaTasks
     tasks:
-      RightHandForward:
+      RightHandTask:
         type: body6d
         frame: r_wrist
         position: [0.5, -0.25, 1.1]
         orientation: [0.7, 0, 0.7, 0]
         completion:
-          eval: 0.1
+          OR:
+            - eval: 0.1
+            - timeout: 5
       LookAtRightHand:
         type: lookAtSurface
         frame: NECK_P_S
@@ -141,49 +108,52 @@ states:
   SimpleHumanoidController::RightBackward:
     base: MetaTasks
     tasks:
-      RightHandReturn:
+      RightHandTask:
         type: body6d
         frame: r_wrist
-        position: [0.122195, -0.327027, 0.831981]
-        orientation: [0.944, 0, 0.328, 0]
+        position: [0.14, -0.33, 0.83]
+        orientation: [0.97, 0.081, 0.21, 0.025]
         completion:
-          eval: 0.1
+          OR:
+            - eval: 0.1
+            - timeout: 5
 
   SimpleHumanoidController::BothForward:
     base: MetaTasks
     tasks:
-      LeftHandForward:
+      BothHandTaskLeft:
         type: body6d
         frame: l_wrist
-        orientation: [0.7, 0, 0.7, 0]
         position: [0.5, 0.25, 1.1]
+        orientation: [0.7, 0, 0.7, 0]
         completion:
-          eval: 0.1
-      RightHandForward:
+          OR:
+            - eval: 0.1
+            - timeout: 5
+      BothHandTaskRight:
         type: body6d
         frame: r_wrist
-        orientation: [0.7, 0, 0.7, 0]
         position: [0.5, -0.25, 1.1]
+        orientation: [0.7, 0, 0.7, 0]
         completion:
-          eval: 0.1
+          OR:
+            - eval: 0.1
+            - timeout: 5
+      LookForward:
+        type: lookAt
+        frame: NECK_P_S
+        frameVector: [1.0, 0.0, 0.0]
+        targetPos: [1000.0, 0.0, 0.0]
 
   SimpleHumanoidController::BothBackward:
-    base: MetaTasks
+    base: SimpleHumanoidController::BothForwardg
     tasks:
-      LeftHandReturn:
-        type: body6d
-        frame: l_wrist
-        position: [0.122195, 0.327027, 0.831981]
-        orientation: [0.944, 0, 0.328, 0]
-        completion:
-            eval: 0.1
-      RightHandReturn:
-        type: body6d
-        frame: r_wrist
-        position: [0.122195, -0.327027, 0.831981]
-        orientation: [0.944, 0, 0.328, 0]
-        completion:
-          eval: 0.1
+      BothHandTaskLeft:
+        position: [0.14, 0.33, 0.83]
+        orientation: [0.97, 0.081, 0.21, 0.025]
+      BothHandTaskRight:
+        position: [0.14, -0.33, 0.83]
+        orientation: [0.97, 0.081, 0.21, 0.025]
 
   SimpleHumanoidController::FSM:
     base: Meta
@@ -203,16 +173,4 @@ states:
 transitions:
 - [SimpleHumanoidController::Demo, OK, SimpleHumanoidController::Demo, Strict]
 
-# Initial state
 init: SimpleHumanoidController::Demo
-
-ObserverPipelines:
-  name: MainRobotObservation
-  observers:
-    - type: Encoder
-      config:
-        position: control
-        velocity: control
-    - type: BodySensor
-      config:
-        method: control
