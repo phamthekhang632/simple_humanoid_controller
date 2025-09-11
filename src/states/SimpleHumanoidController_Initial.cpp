@@ -9,7 +9,6 @@ void SimpleHumanoidController_Initial::configure(const mc_rtc::Configuration &co
 
 void SimpleHumanoidController_Initial::start(mc_control::fsm::Controller &ctl_)
 {
-  // auto &ctl = static_cast<SimpleHumanoidController &>(ctl_);
   ctl_.gui()->addElement(
       {},
       mc_rtc::gui::Button("Start Moving", [this]()
@@ -18,10 +17,6 @@ void SimpleHumanoidController_Initial::start(mc_control::fsm::Controller &ctl_)
 
 bool SimpleHumanoidController_Initial::run(mc_control::fsm::Controller &ctl_)
 {
-  // auto &ctl = static_cast<SimpleHumanoidController &>(ctl_);
-  // output("OK");
-  // return true;
-
   if (startMoving_)
   {
     output("StartMoving");
@@ -32,7 +27,6 @@ bool SimpleHumanoidController_Initial::run(mc_control::fsm::Controller &ctl_)
 
 void SimpleHumanoidController_Initial::teardown(mc_control::fsm::Controller &ctl_)
 {
-  // auto &ctl = static_cast<SimpleHumanoidController &>(ctl_);
   ctl_.gui()->removeElement({}, "Start Moving");
 }
 
