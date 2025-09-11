@@ -11,4 +11,8 @@ struct SimpleHumanoidController_DLLAPI SimpleHumanoidController : public mc_cont
 
   bool run() override;
   void reset(const mc_control::ControllerResetData &reset_data) override;
+
+  // private:
+  //   sva::PTransformd leftHandInitPose_;
+  //   sva::PTransformd rightHandInitPose_;
 };
