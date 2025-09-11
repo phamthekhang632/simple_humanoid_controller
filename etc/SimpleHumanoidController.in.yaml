@@ -96,18 +96,58 @@ states:
   SimpleHumanoidController::LeftForward:
     base: MetaTasks
     tasks:
-      LeftHandTask:
+      LeftHandForward:
         type: body6d
         frame: l_wrist
-        orientation: [0.7, 0, 0.7, 0]
         position: [0.5, 0.25, 1.1]
+        orientation: [0.7, 0, 0.7, 0]
+        completion:
+            eval: 0.1
+
+  SimpleHumanoidController::LeftBackward:
+    base: MetaTasks
+    tasks:
+      LeftHandReturn:
+        type: body6d
+        frame: l_wrist
+        position: [0.122195, 0.327027, 0.831981]
+        orientation: [0.944, 0, 0.328, 0]
         completion:
             eval: 0.1
 
   SimpleHumanoidController::RightForward:
     base: MetaTasks
     tasks:
-      LeftHandTask:
+      RightHandForward:
+        type: body6d
+        frame: r_wrist
+        position: [0.5, -0.25, 1.1]
+        orientation: [0.7, 0, 0.7, 0]
+        completion:
+          eval: 0.1
+
+  SimpleHumanoidController::RightBackward:
+    base: MetaTasks
+    tasks:
+      RightHandReturn:
+        type: body6d
+        frame: r_wrist
+        position: [0.122195, -0.327027, 0.831981]
+        orientation: [0.944, 0, 0.328, 0]
+        completion:
+          eval: 0.1
+
+  SimpleHumanoidController::BothForward:
+    base: MetaTasks
+    tasks:
+      LeftHandForward:
+        type: body6d
+        frame: l_wrist
+        orientation: [0.7, 0, 0.7, 0]
+        position: [0.5, 0.25, 1.1]
+        completion:
+          eval: 0.1
+      RightHandForward:
         type: body6d
         frame: r_wrist
         orientation: [0.7, 0, 0.7, 0]
@@ -115,13 +155,34 @@ states:
         completion:
           eval: 0.1
 
+  SimpleHumanoidController::BothBackward:
+    base: MetaTasks
+    tasks:
+      LeftHandReturn:
+        type: body6d
+        frame: l_wrist
+        position: [0.122195, 0.327027, 0.831981]
+        orientation: [0.944, 0, 0.328, 0]
+        completion:
+            eval: 0.1
+      RightHandReturn:
+        type: body6d
+        frame: r_wrist
+        position: [0.122195, -0.327027, 0.831981]
+        orientation: [0.944, 0, 0.328, 0]
+        completion:
+          eval: 0.1
+
   SimpleHumanoidController::FSM:
     base: Meta
     transitions:
     - [SimpleHumanoidController_Initial, StartMoving, SimpleHumanoidController::LeftForward, Auto]
-    - [SimpleHumanoidController::LeftForward, OK, SimpleHumanoidController::RightForward, Auto]
-    - [SimpleHumanoidController::RightForward, OK, SimpleHumanoidController::LeftForward, Auto]
-    - [SimpleHumanoidController::LeftForward, OK, SimpleHumanoidController::RightForward, Auto]
+    - [SimpleHumanoidController::LeftForward, OK, SimpleHumanoidController::LeftBackward, Auto]
+    - [SimpleHumanoidController::LeftBackward, OK, SimpleHumanoidController::RightForward, Auto]
+    - [SimpleHumanoidController::RightForward, OK, SimpleHumanoidController::RightBackward, Auto]
+    - [SimpleHumanoidController::RightBackward, OK, SimpleHumanoidController::BothForward, Auto]
+    - [SimpleHumanoidController::BothForward, OK, SimpleHumanoidController::BothBackward, Auto]
+    - [SimpleHumanoidController::BothBackward, OK, SimpleHumanoidController::LeftForward, Auto]
 
   SimpleHumanoidController::Demo:
     base: Parallel
