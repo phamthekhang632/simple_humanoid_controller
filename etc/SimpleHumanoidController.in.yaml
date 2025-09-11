@@ -103,6 +103,12 @@ states:
         orientation: [0.7, 0, 0.7, 0]
         completion:
             eval: 0.1
+      LookAtLeftHand:
+        type: lookAtSurface
+        frame: NECK_P_S
+        frameVector: [1.0, 0.0, 0.0]
+        target:
+          frame: l_wrist
 
   SimpleHumanoidController::LeftBackward:
     base: MetaTasks
@@ -125,6 +131,12 @@ states:
         orientation: [0.7, 0, 0.7, 0]
         completion:
           eval: 0.1
+      LookAtRightHand:
+        type: lookAtSurface
+        frame: NECK_P_S
+        frameVector: [1.0, 0.0, 0.0]
+        target:
+          frame: r_wrist
 
   SimpleHumanoidController::RightBackward:
     base: MetaTasks
