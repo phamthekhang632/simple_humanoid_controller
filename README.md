@@ -1,7 +1,7 @@
 Simple Humanoid Controller
 ==
 
-This is a simple controller example for the JCVR1 robot using [mc_rtc](https://github.com/jrl-umi3218/mc_rtc.git) framework. 
+This is a simple controller example for the JVRC-1 robot using [mc_rtc](https://github.com/jrl-umi3218/mc_rtc.git) framework. 
 
 The controller achieves the following:
 
@@ -17,7 +17,7 @@ While a single hand is moving, the robot looks at the moving hand. When both han
 
 ### Demo video
 
-[![Demo](media/demo.png)](media/demo.mp4)
+[![Demo](media/demo.gif)](media/demo.mp4)
 
 Requirements
 --
@@ -39,7 +39,7 @@ RViZ and X11 are not required if you are using other methods for visualization.
 
 ### Windows
 
-If you are on Windows, you can use `jammy` container from this [repository](https://github.com/phamthekhang632/mc-rtc-superbuild). There are some adjustments to make the installation smoother. You still need to install Docker and VcXsrv. Check the branch `installation` for more details.
+If you are on Windows, you can use `jammy` container from this [repository](https://github.com/phamthekhang632/mc-rtc-superbuild). There are some adjustments to make the installation smoother. You still need to install Docker and VcXsrv. Check the branch [installation](https://github.com/phamthekhang632/mc-rtc-superbuild/tree/installation) for more details.
 
 Usage
 --
@@ -53,7 +53,7 @@ git config --global user.name "Full Name"
 git config --global user.email "your.email@provider.com"
 ```
 
-After installing `mc_rtc_superbuild`, clone this repository in `extensions` 
+After installing `mc_rtc_superbuild`, clone this repository in `extensions`
 ```bash
 cd extensions
 git clone https://github.com/phamthekhang632/simple_humanoid_controller.git
@@ -113,7 +113,7 @@ ros2 launch mc_rtc_ticker display.launch
 
 If you have an error here:
 - Fails because ROS is missing → ensure `"WITH_ROS_SUPPORT": "ON"`
-- RViZ cannot connect to X11 → check `DISPLAY` variable and X server
+- RViZ cannot connect to X11 → check `DISPLAY` variable and X server in `devcontainer.json`
 
 Summary
 --
