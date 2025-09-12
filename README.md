@@ -138,3 +138,21 @@ mc_rtc_ticker -f extensions/simple_humanoid_controller/etc/SimpleHumanoidControl
 source /home/vscode/workspace/install/setup_mc_rtc.sh
 ros2 launch mc_rtc_ticker display.launch
 ```
+
+FSM
+--
+
+`mc_rtc` provides a [finite-state machine (FSM)](https://jrl.cnrs.fr/mc_rtc/tutorials/recipes/fsm.html) for managing controller logic through states and transitions.
+An FSM-based version of this controller is available in the [fsm](https://github.com/phamthekhang632/simple_humanoid_controller/tree/fsm) branch.
+
+To try the FSM version, switch to `fsm` branch:
+
+```bash
+git checkout fsm
+```
+
+Then rebuild and run the controller as before.
+
+### Demo video
+
+![Demo](media/fsm.gif)
