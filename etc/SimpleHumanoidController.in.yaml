@@ -146,7 +146,7 @@ states:
         targetPos: [1000.0, 0.0, 0.0]
 
   SimpleHumanoidController::BothBackward:
-    base: SimpleHumanoidController::BothForwardg
+    base: SimpleHumanoidController::BothForward
     tasks:
       BothHandTaskLeft:
         position: [0.14, 0.33, 0.83]
