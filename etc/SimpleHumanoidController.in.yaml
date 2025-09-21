@@ -1,5 +1,5 @@
 ---
-MainRobot: JVRC1
+# MainRobot: JVRC1
 Enabled: SimpleHumanoidController
 
 Managed: false
@@ -27,18 +27,21 @@ constraints:
 
 collisions:
 - type: collision
+  useMinimal: true
 
 contacts:
-- r2: ground
+- r1: jvrc1
   r1Surface: LeftFoot
+  r2: ground
   r2Surface: AllGround
-- r2: ground
+- r1: jvrc1
   r1Surface: RightFoot
+  r2: ground
   r2Surface: AllGround
-
 jvrc1:
   posture:
-    stiffness: 10
+    stiffness: 1.0
+    weight: 10.0
 
 states:
   SimpleHumanoidController::Standing:
@@ -58,7 +61,7 @@ states:
   SimpleHumanoidController::LeftForward:
     base: MetaTasks
     tasks:
-      LeftHandTask:
+      LeftHandForwardTask:
         type: body6d
         frame: l_wrist
         position: [0.5, 0.25, 1.1]
@@ -67,17 +70,17 @@ states:
           OR:
             - eval: 0.1
             - timeout: 5
-      LookAtLeftHand:
-        type: lookAtSurface
-        frame: NECK_P_S
-        frameVector: [1.0, 0.0, 0.0]
-        target:
-          frame: l_wrist
+      # LookAtLeftHand:
+      #   type: lookAtSurface
+      #   frame: NECK_P_S
+      #   frameVector: [1.0, 0.0, 0.0]
+      #   target:
+      #     frame: l_wrist
 
   SimpleHumanoidController::LeftBackward:
     base: MetaTasks
     tasks:
-      LeftHandTask:
+      LeftHandBackwardTask:
         type: body6d
         frame: l_wrist
         position: [0.14, 0.33, 0.83]
@@ -86,10 +89,11 @@ states:
           OR:
             - eval: 0.1
             - timeout: 5
+
   SimpleHumanoidController::RightForward:
     base: MetaTasks
     tasks:
-      RightHandTask:
+      RightHandForwardTask:
         type: body6d
         frame: r_wrist
         position: [0.5, -0.25, 1.1]
@@ -98,17 +102,17 @@ states:
           OR:
             - eval: 0.1
             - timeout: 5
-      LookAtRightHand:
-        type: lookAtSurface
-        frame: NECK_P_S
-        frameVector: [1.0, 0.0, 0.0]
-        target:
-          frame: r_wrist
+      # LookAtRightHand:
+      #   type: lookAtSurface
+      #   frame: NECK_P_S
+      #   frameVector: [1.0, 0.0, 0.0]
+      #   target:
+      #     frame: r_wrist
 
   SimpleHumanoidController::RightBackward:
     base: MetaTasks
     tasks:
-      RightHandTask:
+      RightHandBackwardTask:
         type: body6d
         frame: r_wrist
         position: [0.14, -0.33, 0.83]
@@ -139,11 +143,11 @@ states:
           OR:
             - eval: 0.1
             - timeout: 5
-      LookForward:
-        type: lookAt
-        frame: NECK_P_S
-        frameVector: [1.0, 0.0, 0.0]
-        targetPos: [1000.0, 0.0, 0.0]
+      # LookForward:
+      #   type: lookAt
+      #   frame: NECK_P_S
+      #   frameVector: [1.0, 0.0, 0.0]
+      #   targetPos: [1000.0, 0.0, 0.0]
 
   SimpleHumanoidController::BothBackward:
     base: SimpleHumanoidController::BothForward
